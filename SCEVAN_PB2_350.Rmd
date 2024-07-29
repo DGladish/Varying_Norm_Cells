@@ -1,0 +1,42 @@
+---
+title: "SCEVAN Test"
+output: html_notebook
+---
+# Load data & put in correct format for SCEVAN
+```{r}
+csvPath <- file.path("C:", "Users", "Jabba", "Project Data", "CITE-seq", "PB2_rna_CITE.csv")
+
+pb2_raw <- read.csv(csvPath)
+
+## For some reason I get an X column instead of row names. Move X column to rownames then delete X column.
+row_names <- pb2_raw$X
+rownames(pb2_raw) <- row_names
+pb2_raw$X <- NULL
+```
+# Convert the loaded data frame to matrix
+```{r}
+pb2_raw_mat <- as.matrix(pb2_raw)
+```
+
+## Take a random 350 cell sample from the pb2 matrix
+```{r}
+set.seed(123)
+
+column_names <- colnames(pb2_raw_mat)
+selected_columns <- sample(column_names, 350)
+pb2_raw_mat_subset <- pb2_raw_mat[, selected_columns]
+dim(pb2_raw_mat_subset)
+```
+
+## Run SCEVAN on the 350 cell subset
+```{r}
+install.packages ("devtools")
+library(devtools)
+install_github("miccec/yaGST")
+install_github("AntonioDeFalco/SCEVAN")
+library(SCEVAN)
+```
+
+```{r}
+results <- SCEVAN::pipelineCNA(pb2_raw_mat_subset, par_cores = 20, SUBCLONES = TRUE, plotTree = TRUE)
+```

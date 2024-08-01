@@ -29,8 +29,8 @@ merged_norm <- merge(th1_raw, th2_raw, by="row.names", all=TRUE)
 rm(th1_csvPath)
 rm(th2_csvPath)
 
-rownames(merged_df) <- merged_df$Row.names
-merged_df$Row.names <- NULL
+rownames(merged_norm) <- merged_norm$Row.names
+merged_norm$Row.names <- NULL
 
 # subset the normal cell data frame
 set.seed(123)

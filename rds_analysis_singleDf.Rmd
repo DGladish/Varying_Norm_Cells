@@ -1,0 +1,126 @@
+---
+title: "rds analysis - single df: draft 1"
+output: html_notebook
+---
+
+
+
+
+```{r}
+# load in the data (1 data frame)
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
+
+rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
+
+example_rds <- readRDS(rds_file_paths[20])
+```
+
+# RDS Analysis
+## TH cells
+```{r}
+condition <- tools::file_path_sans_ext(basename(rds_file_paths[3]))
+
+th_rows <- grepl("TH1|TH2", rownames(example_rds))
+total_th_cells <- sum(th_rows)
+```
+
+### TH NA cells
+```{r}
+th_NA_cells <- sum(th_rows & is.na(example_rds$class))
+
+percent_th_NA <- (th_NA_cells / total_th_cells)*100
+```
+
+
+### TH filtered
+```{r}
+th_filtered_cells <- sum(th_rows & example_rds$class == "filtered" & !is.na(example_rds$class))
+
+percent_th_filtered <- (th_filtered_cells / total_th_cells)*100
+```
+
+
+### determine # & percent cells that were classified
+```{r}
+th_classified_rows <- (grepl("TH1|TH2", rownames(example_rds)) & !example_rds$class=="filtered" & !is.na(example_rds$class))
+
+```
+
+### TH tumor cells
+```{r}
+th_tumor_cells <- sum(th_rows & example_rds$class == "tumor" & !is.na(example_rds$class))
+
+percent_th_tumor <- (th_tumor_cells / total_th_cells) * 100
+```
+
+
+
+
+### TH normal cells
+```{r}
+th_normal_cells <- sum(th_rows & example_rds$class == "normal" & !is.na(example_rds$class))
+
+percent_th_normal <- (th_normal_cells / total_th_cells) * 100
+```
+
+
+### check if percentages add up to 100
+```{r}
+100==sum(percent_th_filtered, percent_th_NA, percent_th_normal, percent_th_tumor)
+```
+
+## BM4 Cells
+```{r}
+bm4_rows <- grepl("BM4", rownames(example_rds))
+total_bm4_cells <- sum(bm4_rows)
+```
+
+### bm4 percent NA
+```{r}
+bm4_NA_cells <- sum(bm4_rows & is.na(example_rds$class))
+
+percent_bm4_NA <- (bm4_NA_cells / total_bm4_cells)*100
+```
+
+### bm4 percent filtered
+```{r}
+bm4_filtered_cells <- sum(bm4_rows & example_rds$class == "filtered" & !is.na(example_rds$class))
+
+percent_bm4_filtered <- (bm4_filtered_cells / total_bm4_cells)*100
+```
+
+
+### bm4 percent tumor
+```{r}
+bm4_tumor_cells <- sum(bm4_rows & example_rds$class == "tumor" & !is.na(example_rds$class))
+
+percent_bm4_tumor <- bm4_tumor_cells/total_bm4_cells*100
+```
+
+### bm4 percent normal
+```{r}
+bm4_normal_cells <- sum(bm4_rows & example_rds$class == "normal" & !is.na(example_rds$class))
+
+percent_bm4_normal <- bm4_normal_cells/total_bm4_cells*100
+```
+
+### check if percentages add to 100
+```{r}
+100==sum(percent_bm4_filtered, percent_bm4_NA, percent_bm4_normal, percent_bm4_tumor)
+```
+
+
+```{r}
+results_df <- data.frame(
+    Condition = condition,
+    Percent_TH_NA = percent_th_NA,
+    percent_TH_filtered = percent_th_filtered,
+    Percent_TH_normal = percent_th_normal,
+    Percent_TH_Tumor = percent_th_tumor,
+    Percent_BM4_NA = percent_bm4_NA,
+    Percent_BM4_filtered = percent_bm4_filtered,
+    Percent_BM4_Tumor = percent_bm4_tumor,
+    Percent_BM4_Normal = percent_bm4_normal
+  )
+```
+

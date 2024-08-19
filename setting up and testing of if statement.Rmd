@@ -1,0 +1,62 @@
+---
+title: "making sure the if statements work"
+output: html_notebook
+---
+
+
+```{r}
+# load in the data (1 data frame)
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
+
+rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
+```
+
+
+```{r}
+# Read all .rds files into a list
+data_list <- lapply(rds_file_paths, readRDS)
+
+# name the list elements 
+names(data_list) <- tools::file_path_sans_ext(basename(rds_file_paths))
+# ^ note I have checked that this names the data frames in the list the correct names 
+```
+
+## practice w/ the if statements
+```{r}
+if (sum(grepl("BM4", rownames(example_rds)))>0 & sum(grepl("PB2", rownames(example_rds)))==0) {
+  print("BM4 dataset")
+} else if (sum(grepl("BM4", rownames(example_rds)))==0 & sum(grepl("PB2", rownames(example_rds)))>0) {
+  print("PB2 dataset")
+} else if (sum(grepl("BM4", rownames(example_rds)))>0 & sum(grepl("PB2", rownames(example_rds)))>0) {
+  print("Combined dataset")
+} else {
+  print("Error")
+}
+```
+
+## above seems to work. Now try it as a function.
+```{r}
+if_test <- function (x) {
+  if (sum(grepl("BM4", rownames(x)))>0 & sum(grepl("PB2", rownames(x)))==0) {
+  print("BM4 dataset")
+} else if (sum(grepl("BM4", rownames(x)))==0 & sum(grepl("PB2", rownames(x)))>0) {
+  print("PB2 dataset")
+} else if (sum(grepl("BM4", rownames(x)))>0 & sum(grepl("PB2", rownames(x)))>0) {
+  print("Combined dataset")
+} else {
+  print("Error")
+}}
+
+```
+
+### test above fxn
+```{r}
+if_test(data_list[[1]])
+
+if_test(data_list[[25]])
+
+if_test(data_list[[45]])
+
+#works! :)
+```
+

@@ -1,0 +1,162 @@
+---
+title: "rds analysis - single df: draft 1"
+output: html_notebook
+---
+
+
+```{r}
+# load in the data (1 data frame)
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
+
+rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
+
+example_rds <- readRDS(rds_file_paths[20])
+```
+
+# RDS Analysis
+## TH cells
+```{r}
+condition <- tools::file_path_sans_ext(basename(rds_file_paths[20]))
+
+th_rows <- grepl("TH1|TH2", rownames(example_rds))
+total_th_cells <- sum(th_rows)
+```
+
+### TH NA cells
+```{r}
+th_NA_cells <- sum(th_rows & is.na(example_rds$class))
+
+# calculate % of TH cells that have class = NA
+percent_Allth_NA <- (th_NA_cells / total_th_cells)*100
+```
+
+
+### TH filtered
+```{r}
+th_filtered_cells <- sum(th_rows & example_rds$class == "filtered" & !is.na(example_rds$class))
+
+# calculate % of TH cells that have class = filtered
+percent_Allth_filtered <- (th_filtered_cells / total_th_cells)*100
+```
+
+### Determine number & percent of TH cells that get classified
+```{r}
+# number of TH cells classified:
+th_classified_rows <- (grepl("TH1|TH2", rownames(example_rds)) & !example_rds$class=="filtered" & !is.na(example_rds$class))
+
+num_th_classified <- sum(th_classified_rows)
+
+# percent of TH cells classified, out of all of the TH cells
+percent_th_classified <- num_th_classified/total_th_cells*100
+```
+
+
+### TH tumor cells
+```{r}
+th_tumor_cells <- sum(th_rows & example_rds$class == "tumor" & !is.na(example_rds$class))
+# ^ checked by visually counting and is correct
+
+
+percent_th_tumor <- (th_tumor_cells / num_th_classified) * 100
+# good
+```
+
+
+### TH normal cells
+```{r}
+th_normal_cells <- sum(th_rows & example_rds$class == "normal" & !is.na(example_rds$class))
+
+percent_th_normal <- (th_normal_cells / num_th_classified) * 100
+```
+
+
+## Leuk Cells. NOTE: when iterating, for PB2: can just swap sample name. For combined: can just add what was written in PB2.
+```{r}
+leuk_rows <- grepl("BM4|PB2", rownames(example_rds))
+total_leuk_cells <- sum(leuk_rows)
+```
+
+
+### leuk NA
+```{r}
+leuk_NA_cells <- sum(leuk_rows & is.na(example_rds$class))
+
+percent_leuk_NA <- (leuk_NA_cells / total_leuk_cells)*100
+```
+
+### leuk filtered
+```{r}
+leuk_filtered_cells <- sum(leuk_rows & example_rds$class == "filtered" & !is.na(example_rds$class))
+
+percent_leuk_filtered <- (leuk_filtered_cells / total_leuk_cells)*100
+```
+
+### Determine number & percent of leuk cells that get classified
+```{r}
+# number of leuk cells classified:
+leuk_classified_rows <- (grepl("BM4|PB2", rownames(example_rds)) & !example_rds$class=="filtered" & !is.na(example_rds$class))
+
+num_leuk_classified <- sum(leuk_classified_rows)
+
+# percent of leuk cells classified, out of all of the leuk cells
+percent_leuk_classified <- num_leuk_classified/total_leuk_cells*100
+```
+
+
+### leuk tumor
+```{r}
+leuk_tumor_cells <- sum(leuk_rows & example_rds$class == "tumor" & !is.na(example_rds$class))
+
+percent_leuk_tumor <- leuk_tumor_cells/num_leuk_classified*100
+```
+
+### leuk normal
+```{r}
+leuk_normal_cells <- sum(leuk_rows & example_rds$class == "normal" & !is.na(example_rds$class))
+
+percent_leuk_normal <- leuk_normal_cells/num_leuk_classified*100
+```
+
+## prepare data frame containing the percentage results
+```{r}
+results_df_perc <- data.frame(
+    Condition = condition,
+    All_TH_Percent_NA = percent_Allth_NA,
+    All_TH_Percent_Filtered = percent_Allth_filtered,
+    classified_TH_Percent_Normal = percent_th_normal,
+    Classified_TH_Percent_Tumor = percent_th_tumor,
+    All_leuk_Percent_NA = percent_leuk_NA,
+    All_leuk_Percent_Filtered = percent_leuk_filtered,
+    Classified_leuk_Percent_Tumor = percent_leuk_tumor,
+    Classified_leuk_Percent_Normal = percent_leuk_normal
+  )
+```
+
+## prepare data frame containing the count results
+```{r}
+th1_rows <- grepl("TH1", rownames(example_rds))
+total_th1_cells <- sum(th1_rows)
+
+th2_rows <- grepl("TH2", rownames(example_rds))
+total_th2_cells <- sum(th2_rows)
+
+#Question: would it make sense to separate counts and percentages into different data frames? Or would it be better to just have everything in one?
+results_df_num <- data.frame(
+  Condition = condition,
+  Total_TH1 = total_th1_cells,
+  Total_TH2 = total_th2_cells,
+  Total_TH = total_th_cells,
+  Number_TH_NA = th_NA_cells, 
+  Number_TH_Filtered = th_filtered_cells,
+  Number_TH_classified = num_th_classified,
+  Number_TH_Tumor = th_tumor_cells,
+  Number_TH_Normal = th_normal_cells,
+  Total_Leuk = total_leuk_cells,
+  Number_Leuk_NA = leuk_NA_cells,
+  Number_Leuk_Filtered = leuk_filtered_cells,
+  Number_Leuk_Classified = num_leuk_classified,
+  Number_Leuk_Tumor = leuk_tumor_cells,
+  Number_Leuk_Normal = leuk_normal_cells
+)
+```
+

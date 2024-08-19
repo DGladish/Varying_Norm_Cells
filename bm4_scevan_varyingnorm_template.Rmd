@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+bm4_csvPath <- "/home/dgladish/projects/rrg-tperkins/dgladish/Projects/MSc/Brand_Perkins/T-ALL_Clonal/CITE-seq/data/BM4_rna_CITE.csv"
+th1_csvPath <- "/home/dgladish/projects/rrg-tperkins/dgladish/Projects/MSc/Brand_Perkins/T-ALL_Clonal/CITE-seq/data/TH1_rna_CITE.csv"
+th2_csvPath <- "/home/dgladish/projects/rrg-tperkins/dgladish/Projects/MSc/Brand_Perkins/T-ALL_Clonal/CITE-seq/data/TH2_rna_CITE.csv"
+```
+
+
+```{r}
+bm4_raw <- read.csv(bm4_csvPath)
+rownames_bm4 <- bm4_raw$X
+rownames(bm4_raw) <- rownames_bm4
+bm4_raw$X <- NULL
+
+th1_raw <- read.csv(th1_csvPath)
+rownames_th1 <- th1_raw$X
+rownames(th1_raw) <- rownames_th1
+th1_raw$X <- NULL
+
+th2_raw <- read.csv(th2_csvPath)
+rownames_th2 <- th2_raw$X
+rownames(th2_raw) <- rownames_th2
+th2_raw$X <- NULL
+```
+
+
+```{r}
+# add sample-specific suffixes
+colnames(bm4_raw) <- paste0(colnames(bm4_raw), "-BM4")
+colnames(th1_raw) <- paste0(colnames(th1_raw), "-TH1")
+colnames(th2_raw) <- paste0(colnames(th2_raw), "-TH2")
+```
+
+
+```{r}
+# merge the TH1 and TH2 matrices
+merged_norm <- merge(th1_raw, th2_raw, by="row.names", all=TRUE)
+rm(th1_csvPath)
+rm(th2_csvPath)
+
+rownames(merged_norm) <- merged_norm$Row.names
+merged_norm$Row.names <- NULL
+```
+
+
+```{r}
+# subset the normal cell data frame
+set.seed(123)
+
+norm_names <- colnames(merged_norm)
+print(head(norm_names))
+print(length(norm_names))
+
+sampled_norm_names <- sample(norm_names, )
+print(length(sampled_norm_names))
+
+merged_norm_subset <- merged_norm[, sampled_norm_names]
+print(ncol(merged_norm_subset))
+```
+
+
+```{r}
+# merge the leukemia sample and normal sample subset data frames
+merged_counts <- merge(bm4_raw, merged_norm_subset, by="row.names", all=TRUE)
+row.names(merged_counts) <- merged_counts$Row.names
+merged_counts$Row.names <- NULL
+```
+
+
+```{r}
+# convert periods in cell names to dashes
+colnames(merged_counts) <- gsub("\\.", "-", colnames(merged_counts))
+
+sampled_norm_names <- gsub("\\.", "-", sampled_norm_names)
+```
+
+
+```{r}
+# convert to matrix
+merged_counts <- as.matrix(merged_counts)
+```
+
+
+```{r}
+# load dependencies
+library(devtools)
+library(SCEVAN)
+```
+
+
+```{r}
+# run SCEVAN
+results <- SCEVAN::pipelineCNA(merged_counts, norm_cell = sampled_norm_names, par_cores = 1, SUBCLONES = TRUE, plotTree = TRUE, sample="bm4_norm__")
+saveRDS(results, file = "/home/dgladish/projects/rrg-tperkins/dgladish/tests/varying_norm_cells/bm4//bm4_norm__.rds")
+```
+

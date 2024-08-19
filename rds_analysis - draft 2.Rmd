@@ -1,0 +1,151 @@
+---
+title: "rds analysis - draft 2"
+output: html_notebook
+---
+
+# initialize
+```{r}
+# load in the data (1 data frame)
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
+
+rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
+```
+
+```{r}
+# Read all .rds files into a list
+data_list <- lapply(rds_file_paths, readRDS)
+
+data_list_test <- data_list
+
+# name the list elements 
+names(data_list) <- tools::file_path_sans_ext(basename(rds_file_paths))
+```
+
+# initialize the two results data frame
+```{r}
+results_df <- data.frame(
+  Condition = character(0),
+  All_TH_Percent_NA = integer(0),
+  All_TH_Percent_Filtered = integer(0),
+  classified_TH_Percent_Normal = integer(0),
+  Classified_TH_Percent_Tumor = integer(0),
+  All_leuk_Percent_NA = integer(0),
+  All_leuk_Percent_Filtered = integer(0),
+  Classified_leuk_Percent_Tumor = integer(0),
+  Classified_leuk_Percent_Normal = integer(0)
+)
+
+results_df_counts <- data.frame(
+  Condition = character(0),
+  Total_TH1 = integer(0),
+  Total_TH2 = integer(0),
+  Total_TH = integer(0),
+  Number_TH_NA = integer(0), 
+  Number_TH_Filtered = integer(0),
+  Number_TH_classified = integer(0),
+  Number_TH_Tumor = integer(0),
+  Number_TH_Normal = integer(0),
+  Total_Leuk = integer(0),
+  Number_Leuk_NA = integer(0),
+  Number_Leuk_Filtered = integer(0),
+  Number_Leuk_Classified = integer(0),
+  Number_Leuk_Tumor = integer(0),
+  Number_Leuk_Normal = integer(0)
+)
+```
+
+
+# rds analysis. I have 3 main combinations of the data: 1) BM4+TH1&TH2, PB2+TH1&TH2, and BM4&PB2+TH1&TH2. For each of these combinations, I have a unique analysis code (similar, but some differences specific to the )
+```{r}
+for (i in seq_along(data_list)) {
+    
+  # Extract the current data frame
+  df <- data_list[[i]]
+  
+  # Get the file name for tracking purposes
+  condition_name <- names(data_list)[i]
+  
+  # start the analysis
+  ## TH cells
+  ### Total TH cells
+  th_rows <- grepl("TH1|TH2", rownames(df))
+  total_th_cells <- sum(th_rows)
+  
+  #### TH NA cells
+  th_NA_cells <- sum(th_rows & is.na(df$class))
+  ##### calculate % of TH cells that have class = NA
+  percent_Allth_NA <- (th_NA_cells / total_th_cells)*100
+  
+  #### number of TH cells classified:
+  th_classified_rows <- (grepl("TH1|TH2", rownames(df)) & !df$class=="filtered" & !is.na(df$class))
+
+  num_th_classified <- sum(th_classified_rows)
+
+  #### percent of TH cells classified, out of all of the TH cells
+  percent_th_classified <- num_th_classified/total_th_cells*100
+  
+  #### TH tumor cells
+  th_tumor_cells <- sum(th_rows & df$class == "tumor" & !is.na(df$class))
+  
+  percent_classified_th_tumor <- th_tumor_cells/num_th_classified*100
+  
+  #### TH normal cells
+    th_normal_cells <- sum(th_rows & df$class == "normal" & !is.na(df$class))
+  
+  percent_classified_th_normal <- th_normal_cells/num_th_classified*100
+  ### TH1
+  #### Total TH1 cells
+  #### TH1 NA cells
+  #### TH1 filtered cells
+  #### number & percent of TH1 cells classified
+  #### TH1 tumor cells
+  #### TH1 normal cells
+  
+  ### TH2
+  #### Total TH2 cells
+  #### TH2 NA cells
+  #### TH2 filtered cells
+  #### number & percent of TH2 cells classified
+  #### TH2 tumor cells
+  #### TH2 normal cells
+  
+  ## Leukemia Sample Cells
+  ### Total Leukemia
+  #### Leuk cells
+  
+  #### Leuk NA cells
+  #### Leuk filtered cells
+  #### number & percent of leuk cells classified
+  #### Leuk tumor cells
+  #### Leuk normal cells
+  
+  ### BM4
+  #### BM4 cells
+  
+  #### BM4 NA cells
+  
+  #### BM4 filtered cells
+  
+  #### number & percent of BM4 cells classified
+  
+  #### BM4 tumor cells 
+  
+  #### BM4 normal cells
+  
+  ### PB2 
+  #### PB2 cells
+  
+  #### PB2 NA cells
+  
+  #### PB2 Filtered cells
+  
+  #### number & percent of PB2 cells classified
+  
+  #### PB2 tumor cells 
+  
+  #### PB2 normal cells
+}
+
+
+```
+

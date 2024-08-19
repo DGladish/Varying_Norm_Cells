@@ -1,0 +1,76 @@
+---
+title: "rds analysis - draft 1"
+output: html_notebook
+---
+
+# initializing
+```{r}
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
+
+rds_file_names <- list.files(rds_dir)
+```
+
+
+```{r}
+rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
+```
+
+
+```{r}
+# Read all .rds files into a list
+data_list <- lapply(rds_file_paths, readRDS)
+
+# name the list elements 
+names(data_list) <- tools::file_path_sans_ext(basename(rds_file_paths))
+```
+
+
+```{r}
+# Initialize a data frame to store the results
+results_df <- data.frame(
+  Condition = character(0),
+  Percent_TH_Tumor = numeric(0),
+  Percent_BM4_Tumor = numeric(0),
+  Percent_BM4_Normal = numeric(0)
+)
+```
+
+# analyse the data frames
+```{r}
+# Loop through the list of data frames
+for (i in seq_along(data_list)) {
+  
+  # Extract the current data frame
+  df <- data_list[[i]]
+  
+  # Get the file name for tracking purposes
+  sample_name <- names(data_list)[i]
+  
+  # Part 1: Thymus cells (TH1, TH2)
+  th_rows <- grepl("TH1|TH2", rownames(df))
+  total_th_cells <- sum(th_rows)
+  th_tumor_cells <- sum(th_rows & df$class == "tumor")
+  percent_th_tumor <- (th_tumor_cells / total_th_cells) * 100
+  
+  # Part 2: BM4 cells
+  bm4_rows <- grepl("BM4", rownames(df))
+  total_bm4_cells <- sum(bm4_rows)
+  bm4_tumor_cells <- sum(bm4_rows & df$class == "tumor")
+  bm4_normal_cells <- sum(bm4_rows & df$class == "normal")
+  percent_bm4_tumor <- (bm4_tumor_cells / total_bm4_cells) * 100
+  percent_bm4_normal <- (bm4_normal_cells / total_bm4_cells) * 100
+  
+  # Store the results in the results data frame
+  results_df <- rbind(results_df, data.frame(
+    Condition = sample_name,
+    Percent_TH_Tumor = percent_th_tumor,
+    Percent_BM4_Tumor = percent_bm4_tumor,
+    Percent_BM4_Normal = percent_bm4_normal
+  ))
+```
+
+
+```{r}
+
+```
+

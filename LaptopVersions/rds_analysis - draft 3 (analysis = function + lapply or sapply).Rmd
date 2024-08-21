@@ -6,7 +6,7 @@ output: html_notebook
 # initialize
 ```{r}
 # load in the data
-rds_dir <- "P:/Projects/MSc/Perkins/Varying_Norm_Cells/.rds files"
+rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
 
 rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
 ```

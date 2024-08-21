@@ -1,11 +1,11 @@
 ---
-title: "rds analysis - draft 2"
+title: "rds analysis - draft 3"
 output: html_notebook
 ---
 
 # initialize
 ```{r}
-# load in the data (1 data frame)
+# load in the data
 rds_dir <- "C:/Users/Jabba/OneDrive - University of Ottawa/MSc/Projects/Varying Normal Cells/rds_files/"
 
 rds_file_paths <- list.files(path = rds_dir, full.names = TRUE)
@@ -162,7 +162,7 @@ classification_analysis <- function(x) {
   
   
   
-if (any(grepl("BM4", x)) && !any(grepl("PB2", x))) {
+if (any(grepl("BM4", rownames(x))) && !any(grepl("PB2", rownames(x)))) {
   
   ### BM4 cells
   bm4_rows <- grepl("BM4", rownames(x))
@@ -204,7 +204,7 @@ percent_classified_pb2_normal <- 0
 }
   
   
-else if (any(grepl("BM4", x)) && !any(grepl("PB2", x))) {
+else if (any(grepl("BM4", rownames(x))) && !any(grepl("PB2", rownames(x)))) {
   
   ### pb2 cells
   pb2_rows <- grepl("PB2", rownames(x))
@@ -364,9 +364,421 @@ final_output <- do.call(rbind, output)
 ```
 
 
-
+## attempt 2 at the fxn (code copied from rds_analysis_single_Df - draft 2)
 ```{r}
 
+classification_analysis_v2 <- function(x) {
+# start the analysis
+  ## TH cells
 
+  ### Total TH cells
+  th_rows <- grepl("TH1|TH2", rownames(x))
+  total_th_cells <- sum(th_rows)
+  
+  #### TH NA cells
+  th_NA_cells <- sum(th_rows & is.na(x$class))
+  
+  ##### calculate % of TH cells that have class = NA
+  percent_Allth_NA <- (th_NA_cells / total_th_cells)*100
+  
+  #### TH filtered cells
+  th_filtered_cells <- sum(th_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allth_filtered <- (th_filtered_cells / total_th_cells)*100
+  
+  #### number of TH cells classified:
+  th_classified_rows <- (grepl("TH1|TH2", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_th_classified <- sum(th_classified_rows)
+
+  #### percent of TH cells classified, out of all of the TH cells
+  percent_th_classified <- num_th_classified/total_th_cells*100
+  
+  #### TH tumor cells
+  th_tumor_cells <- sum(th_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_th_tumor <- th_tumor_cells/num_th_classified*100
+  
+  #### TH normal cells
+    th_normal_cells <- sum(th_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_th_normal <- th_normal_cells/num_th_classified*100
+  
+  
+  
+  
+  ### TH1 cells
+  th1_rows <- grepl("TH1", rownames(x))
+  total_th1_cells <- sum(th1_rows)
+  
+  #### th1 NA cells
+  th1_NA_cells <- sum(th1_rows & is.na(x$class))
+  ##### calculate % of th1 cells that have class = NA
+  percent_Allth1_NA <- (th1_NA_cells / total_th1_cells)*100
+  
+  #### th1 filtered cells
+  th1_filtered_cells <- sum(th1_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allth1_filtered <- (th1_filtered_cells / total_th1_cells)*100
+  
+  #### number of th1 cells classified:
+  th1_classified_rows <- (grepl("TH1", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_th1_classified <- sum(th1_classified_rows)
+
+  #### percent of th1 cells classified, out of all of the th1 cells
+  percent_th1_classified <- num_th1_classified/total_th1_cells*100
+  
+  #### th1 tumor cells
+  th1_tumor_cells <- sum(th1_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_th1_tumor <- th1_tumor_cells/num_th1_classified*100
+  
+  #### th1 normal cells
+    th1_normal_cells <- sum(th1_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_th1_normal <- th1_normal_cells/num_th1_classified*100
+  
+  
+  
+  ### th2 cells
+  th2_rows <- grepl("TH2", rownames(x))
+  total_th2_cells <- sum(th2_rows)
+  
+  #### th2 NA cells
+  th2_NA_cells <- sum(th2_rows & is.na(x$class))
+  ##### calculate % of th2 cells that have class = NA
+  percent_Allth2_NA <- (th2_NA_cells / total_th2_cells)*100
+  
+  #### th2 filtered cells
+  th2_filtered_cells <- sum(th2_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allth2_filtered <- (th2_filtered_cells / total_th2_cells)*100
+  
+  #### number of th2 cells classified:
+  th2_classified_rows <- (grepl("TH2", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_th2_classified <- sum(th2_classified_rows)
+
+  #### percent of th2 cells classified, out of all of the th2 cells
+  percent_th2_classified <- num_th2_classified/total_th2_cells*100
+  
+  #### th2 tumor cells
+  th2_tumor_cells <- sum(th2_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_th2_tumor <- th2_tumor_cells/num_th2_classified*100
+  
+  #### th2 normal cells
+    th2_normal_cells <- sum(th2_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_th2_normal <- th2_normal_cells/num_th2_classified*100
+  
+  
+  
+  ### Total Leuk cells
+if (any(grepl("BM4", rownames(x))) && !any(grepl("PB2", rownames(x)))) {
+  total_leuk_cells <- 7493
+} else if (any(grepl("PB2", rownames(x))) && !any(grepl("BM4", rownames(x)))) {
+  total_leuk_cells <- 7150
+} else {
+  total_leuk_cells <- 14643
+}
+  
+  leuk_rows <- grepl("BM4|PB2", rownames(x))
+  
+  #### leuk NA cells
+  leuk_NA_cells <- sum(leuk_rows & is.na(x$class))
+  ##### calculate % of leuk cells that have class = NA
+  percent_Allleuk_NA <- (leuk_NA_cells / total_leuk_cells)*100
+  
+  #### leuk filtered cells
+  leuk_filtered_cells <- sum(leuk_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allleuk_filtered <- (leuk_filtered_cells / total_leuk_cells)*100
+  
+  #### number of leuk cells classified:
+  leuk_classified_rows <- (grepl("BM4|PB2", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_leuk_classified <- sum(leuk_classified_rows)
+
+  #### percent of leuk cells classified, out of all of the leuk cells
+  percent_leuk_classified <- num_leuk_classified/total_leuk_cells*100
+  
+  #### leuk tumor cells
+  leuk_tumor_cells <- sum(leuk_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_leuk_tumor <- leuk_tumor_cells/num_leuk_classified*100
+  
+  #### leuk normal cells
+    leuk_normal_cells <- sum(leuk_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_leuk_normal <- leuk_normal_cells/num_leuk_classified*100
+
+if (any(grepl("BM4", rownames(x))) && !any(grepl("PB2", rownames(x)))) {
+  
+  ### BM4 cells
+  bm4_rows <- grepl("BM4", rownames(x))
+  total_bm4_cells <- 7493
+  
+  #### bm4 NA cells
+  bm4_NA_cells <- sum(bm4_rows & is.na(x$class))
+  ##### calculate % of bm4 cells that have class = NA
+  percent_Allbm4_NA <- (bm4_NA_cells / total_bm4_cells)*100
+  
+  #### bm4 filtered cells
+  bm4_filtered_cells <- sum(bm4_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allbm4_filtered <- (bm4_filtered_cells / total_bm4_cells)*100
+  
+  #### number of bm4 cells classified:
+  bm4_classified_rows <- (grepl("BM4", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_bm4_classified <- sum(bm4_classified_rows)
+
+  #### percent of bm4 cells classified, out of all of the bm4 cells
+  percent_bm4_classified <- num_bm4_classified/total_bm4_cells*100
+  
+  #### bm4 tumor cells
+  bm4_tumor_cells <- sum(bm4_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_bm4_tumor <- bm4_tumor_cells/num_bm4_classified*100
+  
+  #### bm4 normal cells
+    bm4_normal_cells <- sum(bm4_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_bm4_normal <- bm4_normal_cells/num_bm4_classified*100
+ 
+percent_Allpb2_NA <- 0
+percent_Allpb2_filtered <- 0
+percent_pb2_classified <- 0
+percent_classified_pb2_tumor <- 0
+percent_classified_pb2_normal <- 0
+
+selected_analysis_bm4 <- "Executed BM4-specific analysis"  
+  
+} else if (any(grepl("PB2", rownames(x))) && !any(grepl("BM4", rownames(x)))) {
+  
+  ### pb2 cells
+  pb2_rows <- grepl("PB2", rownames(x))
+  total_pb2_cells <- 7150
+  
+  #### pb2 NA cells
+  pb2_NA_cells <- sum(pb2_rows & is.na(x$class))
+  ##### calculate % of pb2 cells that have class = NA
+  percent_Allpb2_NA <- (pb2_NA_cells / total_pb2_cells)*100
+  
+  #### pb2 filtered cells
+  pb2_filtered_cells <- sum(pb2_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allpb2_filtered <- (pb2_filtered_cells / total_pb2_cells)*100
+  
+  #### number of pb2 cells classified:
+  pb2_classified_rows <- (grepl("PB2", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_pb2_classified <- sum(pb2_classified_rows)
+
+  #### percent of pb2 cells classified, out of all of the pb2 cells
+  percent_pb2_classified <- num_pb2_classified/total_pb2_cells*100
+  
+  #### pb2 tumor cells
+  pb2_tumor_cells <- sum(pb2_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_pb2_tumor <- pb2_tumor_cells/num_pb2_classified*100
+  
+  #### pb2 normal cells
+    pb2_normal_cells <- sum(pb2_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_pb2_normal <- pb2_normal_cells/num_pb2_classified*100
+  
+  
+percent_Allbm4_NA <- 0
+percent_Allbm4_filtered <- 0
+percent_bm4_classified <- 0
+percent_classified_bm4_tumor <- 0
+percent_classified_bm4_normal <- 0
+
+selected_analysis_pb2 <- "Executed PB2-specific analysis"
+  
+} else {
+  ### BM4 cells
+  bm4_rows <- grepl("BM4", rownames(x))
+  total_bm4_cells <- 7493
+  
+  #### bm4 NA cells
+  bm4_NA_cells <- sum(bm4_rows & is.na(x$class))
+  ##### calculate % of bm4 cells that have class = NA
+  percent_Allbm4_NA <- (bm4_NA_cells / total_bm4_cells)*100
+  
+  #### bm4 filtered cells
+  bm4_filtered_cells <- sum(bm4_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allbm4_filtered <- (bm4_filtered_cells / total_bm4_cells)*100
+  
+  #### number of bm4 cells classified:
+  bm4_classified_rows <- (grepl("BM4", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_bm4_classified <- sum(bm4_classified_rows)
+
+  #### percent of bm4 cells classified, out of all of the bm4 cells
+  percent_bm4_classified <- num_bm4_classified/total_bm4_cells*100
+  
+  #### bm4 tumor cells
+  bm4_tumor_cells <- sum(bm4_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_bm4_tumor <- bm4_tumor_cells/num_bm4_classified*100
+  
+  #### bm4 normal cells
+    bm4_normal_cells <- sum(bm4_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_bm4_normal <- bm4_normal_cells/num_bm4_classified*100
+  
+  
+  
+  ### pb2 cells
+  pb2_rows <- grepl("PB2", rownames(x))
+  total_pb2_cells <- 7150
+  
+  #### pb2 NA cells
+  pb2_NA_cells <- sum(pb2_rows & is.na(x$class))
+  ##### calculate % of pb2 cells that have class = NA
+  percent_Allpb2_NA <- (pb2_NA_cells / total_pb2_cells)*100
+  
+  #### pb2 filtered cells
+  pb2_filtered_cells <- sum(pb2_rows & x$class == "filtered" & !is.na(x$class))
+  
+  percent_Allpb2_filtered <- (pb2_filtered_cells / total_pb2_cells)*100
+  
+  #### number of pb2 cells classified:
+  pb2_classified_rows <- (grepl("PB2", rownames(x)) & !x$class=="filtered" & !is.na(x$class))
+
+  num_pb2_classified <- sum(pb2_classified_rows)
+
+  #### percent of pb2 cells classified, out of all of the pb2 cells
+  percent_pb2_classified <- num_pb2_classified/total_pb2_cells*100
+  
+  #### pb2 tumor cells
+  pb2_tumor_cells <- sum(pb2_rows & x$class == "tumor" & !is.na(x$class))
+  
+  percent_classified_pb2_tumor <- pb2_tumor_cells/num_pb2_classified*100
+  
+  #### pb2 normal cells
+    pb2_normal_cells <- sum(pb2_rows & x$class == "normal" & !is.na(x$class))
+  
+  percent_classified_pb2_normal <- pb2_normal_cells/num_pb2_classified*100
+
+  selected_analysis_combined <- "Executed combined analysis"
+  }
+
+results_df_perc <- data.frame(
+    All_TH_Percent_NA = percent_Allth_NA,
+    All_TH_Percent_Filtered = percent_Allth_filtered,
+    All_TH_Percent_Classified = percent_th_classified,
+    Classified_TH_Percent_Tumor = percent_classified_th_tumor,
+    Classified_TH_Percent_Normal = percent_classified_th_normal,
+    
+    All_TH1_Percent_NA = percent_Allth1_NA,
+    All_TH1_Percent_Filtered = percent_Allth1_filtered,
+    All_TH1_Percent_Classified = percent_th1_classified,
+    Classified_TH1_Percent_Tumor = percent_classified_th1_tumor,
+    Classified_TH1_Percent_Normal = percent_classified_th1_normal,
+    
+    All_TH2_Percent_NA = percent_Allth2_NA,
+    All_TH2_Percent_Filtered = percent_Allth2_filtered,
+    All_TH2_Percent_Classified = percent_th2_classified,
+    Classified_TH2_Percent_Tumor = percent_classified_th2_tumor,
+    Classified_TH2_Percent_Normal = percent_classified_th2_normal,
+    
+    All_Leuk_Percent_NA = percent_Allleuk_NA,
+    All_Leuk_Percent_Filtered = percent_Allleuk_filtered,
+    All_Leuk_Percent_Classified = percent_leuk_classified,
+    Classified_Leuk_Percent_Tumor = percent_classified_leuk_tumor,
+    Classified_Leuk_Percent_Normal = percent_classified_leuk_normal,
+    
+    All_BM4_Percent_NA = percent_Allbm4_NA,
+    All_BM4_Percent_Filtered = percent_Allbm4_filtered,
+    All_BM4_Percent_Classified = percent_bm4_classified,
+    Classified_BM4_Percent_Tumor = percent_classified_bm4_tumor,
+    Classified_BM4_Percent_Normal = percent_classified_bm4_normal,
+    
+    All_PB2_Percent_NA = percent_Allpb2_NA,
+    All_PB2_Percent_Filtered = percent_Allpb2_filtered,
+    All_PB2_Percent_Classified = percent_pb2_classified,
+    Classified_PB2_Percent_Tumor = percent_classified_pb2_tumor,
+    classified_PB2_Percent_Normal = percent_classified_pb2_normal
+  )
+}
+```
+
+
+# test on a subset of the list
+```{r}
+subset_list <- data_list[c(2, 20, 40)]
+
+test_output_v2 <- lapply(subset_list, classification_analysis_v2)
+
+# Combine the results into a single data frame
+test_final_output_v2 <- do.call(rbind, test_output_v2)
+
+## works!! :)
+```
+
+# use analysis fxn on full list (i.e. all datasets)
+```{r}
+results_list <- lapply(data_list, classification_analysis_v2)
+
+results_df <- do.call(rbind, results_list)
+```
+
+# order results_df
+```{r}
+install.packages('gtools')
+library(gtools)
+
+results_df <- results_df[mixedsort(rownames(results_df)), ]
+```
+
+# plots
+## scatter plot of the percentage of classified thymus cells that get classified as normal
+### install dependencies
+```{r}
+install.packages('tidyverse')
+library(tidyverse)
+```
+
+### prep the inputs
+```{r}
+total_th1_count <- 5064
+total_th2_count <- 3253
+total_th_count <- total_th1_count+total_th2_count
+```
+
+#### create a fxn that determines the correct # cells given a string (condition) as input
+```{r}
+cond_names <- rownames(results_df)
+
+## from copilot:
+
+# Function to convert the strings to numerical values
+convert_to_numeric <- function(strings, total_th_count) {
+  sapply(strings, function(x) {
+    # Extract the numeric part
+    num <- as.numeric(sub(".*_", "", x))
+    
+    # Check if it's a count or percentage and convert accordingly
+    if (grepl("count", x)) {
+      return(num)
+    } else if (grepl("perc", x)) {
+      return((num / 100) * total_th_count)
+    } else {
+      return(NA)  # Handle unexpected cases
+    }
+  })
+}
+
+# Convert the vector
+numeric_values <- convert_to_numeric(strings, total_th_count)
+
+# Print the result
+print(numeric_values)
 ```
 
